@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./bootstrap.up.min.css">
+    <script src="./jquery.slim.min.center.js"></script>
+    <script src="./bootstrap.bundle.down.min.js"></script>
+    <script src="./jquery-3.7.1.js"></script>
+    <style>
+        th,
+        td,
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1>茶叶管理系统1.0版</h1>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" id="text">
+        点击添加
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">添加</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">茶叶名称</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-default" id="name">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">茶叶类型</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-default" id="type">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">茶叶价格</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-default" id="price">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">茶叶库存</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-default" id="stock">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">茶叶介绍</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-default" id="description">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="add">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">茶叶名称</th>
+                <th scope="col">茶叶类型</th>
+                <th scope="col">茶叶价格</th>
+                <th scope="col">茶叶库存</th>
+                <th scope="col">茶叶描述</th>
+                <th scope="col">创建时间</th>
+                <th scope="col">更新时间</th>
+                <th scope="col">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <script>
+        const URL = `https://liu.zzgoodqc.cn`;
+        let index = 0;
+        $(function () {
+            getTea()
+        })
+        $("tbody").on('click', function () {
+            if (event.target.innerHTML == "删除" && event.target.tagName == "BUTTON") {
+                ajax({
+                    url: `/teas/${event.target.dataset.index}`,
+                    method: 'DELETE',
+                    succes: function (res) {
+                        getTea();
+                    }
+                })
+            }
+            if (event.target.innerHTML == "修改" && event.target.tagName == "BUTTON") {
+                $('#text').html("点击修改")
+                $('#exampleModalLabel').html(`修改ID为${event.target.dataset.index}的茶叶`)
+                index = event.target.dataset.index;
+                alert('请点击左上角蓝色按钮填写修改内容')
+                ajax({
+                    url: `/teas/${event.target.dataset.index}`,
+                    succes: function (res) {
+                        if (res.message == '获取单个茶叶记录成功') {
+                            console.log(res.data.name);
+                            $('#name')[0].value = `${res.data.name}`
+                            $('#type')[0].value = `${res.data.type}`
+                            $('#price')[0].value = `${res.data.price}`
+                            $('#stock')[0].value = `${res.data.stock}`
+                            $('#description')[0].value = `${res.data.description}`
+                        }
+                    }
+                })
+            }
+        })
+
+        $("#add").on('click', function () {
+            data = {
+                name: $('#name')[0].value,
+                type: $('#type')[0].value,
+                price: $('#price')[0].value,
+                stock: $('#stock')[0].value,
+                description: $('#description')[0].value,
+            }
+            console.log($('#text').html());
+            if ($('#text').html() == "点击修改") {
+                console.log(1);
+                ajax({
+                    url: `/teas/${index}`,
+                    method: 'PUT',
+                    data: data,
+                    succes: function (res) {
+                        if (res.message == '茶叶更新成功') {
+                            getTea()
+                            $('#text').html("点击添加")
+                        }
+                    }
+                })
+            } else {
+                ajax({
+                    url: '/teas/',
+                    method: 'POST',
+                    data: data,
+                    succes: function (res) {
+                        if (res.message == '茶叶添加成功') {
+                            getTea()
+                        }
+                    }
+                })
+            }
+            //关闭模态框
+            // $('#exampleModal').modal('hide');
+            $("#exampleModal").trigger("click");
+            $('#name')[0].value = ""
+            $('#type')[0].value = ""
+            $('#price')[0].value = ""
+            $('#stock')[0].value = ""
+            $('#description')[0].value = ""
+        })
+
+        function getTea() {
+            ajax({
+                url: '/teas',
+                succes: function (res) {
+                    if (res.message == '获取所有茶叶列表成功') {
+                        render(res.data);
+                    }
+                }
+            })
+        }
+
+        function ajax({ url, method = 'GET', data = null, succes }) {
+            let xhr = new XMLHttpRequest();
+            xhr.open(method, URL + url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.responseType = "json"
+            if (method == 'GET' || method == 'DELETE') {
+                xhr.send()
+            } else {
+                xhr.send(JSON.stringify(data))
+            }
+            xhr.onload = function () {
+                console.log(xhr.response);
+                succes(xhr.response)
+            }
+        }
+
+        function render(data) {
+            var html = ``;
+            data.forEach((element) => {
+                html += `<tr>
+                <th scope="row">${element.id}</th>
+                <td>${element.name}</td>
+                <td>${element.type}</td>
+                <td>${element.price}</td>
+                <td>${element.stock}</td>
+                <td>${element.description}</td>
+                <td>${getTime(element.created_at)}</td>
+                <td>${getTime(element.updated_at)}</td>
+                <td><button data-index="${element.id}">删除</button><button data-index="${element.id}">修改</button></td>
+            </tr>`
+            })
+            $('tbody').html(html);
+        }
+
+        function getTime(time) {
+            let date = new Date(time);
+            let year = date.getFullYear();
+            let month = date.getMonth() + 1;
+            let day = date.getDate();
+            let hours = date.getHours();
+            let min = date.getMinutes();
+            let sec = date.getSeconds();
+            return `${year}-${month}-${day}  ${hours}:${min}:${sec}`
+        }
+    </script>
+</body>
+
+</html>
